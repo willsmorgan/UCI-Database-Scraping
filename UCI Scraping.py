@@ -10,11 +10,11 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 from bs4 import re
 import pandas as pd 
-import os as os#create directories if we need to
+import os as os                #create directories if we need to
 
-
-#Main file path
-rootpath = r'C:\Users\wsmorgan\Desktop\Random Data\UCI Machine Learning Repository/'
+#Set file path here
+#rootpath = r'C:\Users\wsmorgan\Desktop\Random Data\UCI Machine Learning Repository/'
+rootpath = r'C:\Users\wsmorgan\Desktop\UCI Data'
 
 #The code below reassigns the default download folder for the Chrome browser so we can isolate the files for every given year. 
 chromeOptions = webdriver.ChromeOptions()
@@ -102,10 +102,27 @@ for link in links:
     driver.get(base_url + ds_link)
     soup3 = BeautifulSoup(driver.page_source)
     
+    #Make sure that there are no additional folders to click through
+    folders = ""
+    while(folders != "None"):
+        rows = soup3.find_all('tr')
+        for row in rows:
+            if 'folder' in row.find('img').prettify():
+                folder_link = row.find('a')
+                folder_link = folder_link.get('href')
+                ds_link = ds_link + folder_link
+            else:
+                folders = "None"
+        
+            
+    
+    
     dt_links = []
     for dt_link in soup3.findAll('a'):
-        dt_links.append(dt_link.get('href'))    
-    
+        dt_links.append(dt_link.get('href'))
+
+
+
     for dt_link in dt_links:
         
         #Create folder for dataset if it doesn't already exist
@@ -120,20 +137,7 @@ for link in links:
             else:
                 driver.get(base_url + ds_link + dt_link)
                 data = BeautifulSoup(driver.page_source)
-                
-                #we need to get to the base folder, so iteratively search for folders until there are no more
-                folders = ''
-                while(folders != 'No more folders'):
-                    rows = data.find_all('tr')
-                    for row in rows:
-                        if 'folder' in row.find('img').prettify():
-                            
-                            
-                    
-                    
-                    #we can find folders based on an image icon that contains the word folder
-                    folders = data.find_all('img', src = re.compile('folder'))
-                
+            
                 data = data.find('pre')
                 d_string = data.get_text()
                 d_list = d_string.split()
