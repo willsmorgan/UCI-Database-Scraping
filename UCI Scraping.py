@@ -107,8 +107,7 @@ for link in links:
         dt_links.append(dt_link.get('href'))    
     
     for dt_link in dt_links:
-                
-       
+        
         #Create folder for dataset if it doesn't already exist
         folder = rootpath + name
         if not os.path.exists(rootpath + name):
@@ -117,10 +116,24 @@ for link in links:
         #Search for the data set
         if '.data' in dt_link:
             if '.data.Z' in dt_link or '.data.gz' in dt_link:
-                driver.get(base_url + ds_link + dt_link)
+                driver.get(base_url + ds_link + dt_link) #just click on the link in order to download the zip file
             else:
                 driver.get(base_url + ds_link + dt_link)
                 data = BeautifulSoup(driver.page_source)
+                
+                #we need to get to the base folder, so iteratively search for folders until there are no more
+                folders = ''
+                while(folders != 'No more folders'):
+                    rows = data.find_all('tr')
+                    for row in rows:
+                        if 'folder' in row.find('img').prettify():
+                            
+                            
+                    
+                    
+                    #we can find folders based on an image icon that contains the word folder
+                    folders = data.find_all('img', src = re.compile('folder'))
+                
                 data = data.find('pre')
                 d_string = data.get_text()
                 d_list = d_string.split()
@@ -138,25 +151,28 @@ for link in links:
             if os.path.isfile(folder + "\README.txt") == True:
                 with open(folder + "\README.txt", 'w') as f:
                     for line in data.prettify():
-                        f.write(str(line))
+                       try:
+                           f.write(str(line))
+                       except:
+                           pass
             else: 
                 with open(folder + "\README.txt", 'x') as f:
                     for line in data.prettify():
-                        f.write(str(line))
-       
-        
-#        #Clean up the loop for the next iteration
-#        unwanted = [d_string, d_list, df]
-#        for obj in dir():
-#            if obj in unwanted:
-#                del obj
+                        try:
+                            f.write(str(line))
+                        except:
+                            pass
         
     i += 1
     
     
     
 ### CURRENT PROGRESS
- 
+#the code is able to pretty much run through all the datasets, but it fails with irregular data formats 
+
 ### WHEN YOU COME BACK
+#check folders containing downloaded data to make sure there isn't anything too ridiculous
+#adapt code to identify folders within links, click on the folders, then continue the regular download process
 
 ### Specific Tasks
+#while loop to check for folders 
